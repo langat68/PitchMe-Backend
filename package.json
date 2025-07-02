@@ -8,13 +8,21 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "@hono/zod-validator": "^0.7.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.0.1",
     "drizzle-orm": "^0.44.2",
     "hono": "^4.8.3",
-    "pg": "^8.16.3"
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.4",
+    "pg": "^8.16.3",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.11.17",
+    "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.15.4",
     "drizzle-kit": "^0.31.4",
     "tsx": "^4.20.3",
