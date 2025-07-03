@@ -486,13 +486,13 @@ const CustomSectionSchema = z.object({
 
 // Main Resume Schema
 export const CreateResumeSchema = z.object({
-  title: z.string().min(1, "Resume title is required"),
+  title: z.string().min(1, "Resume title is required").optional(),
   templateId: z.string().uuid().optional(),
   personalInfo: PersonalInfoSchema.optional(),
   professionalSummary: z.string().optional(),
   experience: z.array(ExperienceSchema).optional(),
   education: z.array(EducationSchema).optional(),
-  skills: SkillsSchema.optional(),
+  skills: z.array(z.string()).optional(),
   projects: z.array(ProjectSchema).optional(),
   customSections: z.array(CustomSectionSchema).optional(),
   targetRole: z.string().max(100).optional(),

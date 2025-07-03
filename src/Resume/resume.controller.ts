@@ -39,7 +39,11 @@ export class ResumeController {
       }
 
       const body = await c.req.json();
+      console.log('--- Backend createResume ---');
+      console.log('Received request body:', JSON.stringify(body, null, 2));
+
       const validatedData = CreateResumeSchema.parse(body);
+      console.log('Validated data:', JSON.stringify(validatedData, null, 2));
 
       const resume = await this.resumeService.createResume(userId, validatedData);
 
@@ -49,12 +53,23 @@ export class ResumeController {
         message: 'Resume created successfully'
       }, 201);
     } catch (error) {
+      console.error('--- Backend createResume Error ---');
+      console.error('Error occurred:', error);
+
       if (isZodError(error)) {
+        console.error('Zod validation failed:', error.errors);
         throw new HTTPException(400, { 
           message: 'Validation error', 
           cause: error.errors 
         });
       }
+      
+      if (error instanceof HTTPException) {
+        console.error('HTTP Exception:', { status: error.status, message: error.message, cause: error.cause });
+        throw error;
+      }
+
+      console.error('Unhandled error type:', typeof error);
       throw new HTTPException(500, { message: getErrorMessage(error) });
     }
   };

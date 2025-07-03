@@ -1,17 +1,15 @@
-// services/resume.service.ts
-import { eq, and, desc, asc, ilike, sql } from 'drizzle-orm';
-import { db } from '../db/db.js'; // Adjust path as needed
-import { resumes, userAnalytics, templates } from '../db/schema.js'; // Adjust path as needed
-import type  { 
-  CreateResumeInput, 
-  UpdateResumeInput, 
+import { eq, and, desc, sql } from 'drizzle-orm';
+import { db } from '../db/db.js';
+import { resumes, userAnalytics, templates } from '../db/schema.js';
+import type {
+  CreateResumeInput,
+  UpdateResumeInput,
   ResumeQueryInput,
   ShareResumeInput,
-  BulkDeleteInput 
+  BulkDeleteInput
 } from '../validator.js';
 import { randomUUID } from 'crypto';
 
-// Helper function to handle unknown errors
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
@@ -19,16 +17,37 @@ function getErrorMessage(error: unknown): string {
 }
 
 export class ResumeService {
-  
   async createResume(userId: string, data: CreateResumeInput) {
     try {
       const [resume] = await db.insert(resumes).values({
-        ...data,
         userId,
-        shareToken: data.isPublic ? randomUUID() : null,
+        templateId: data.templateId ?? null,
+        title: data.title ?? 'Untitled Resume',
+        personalInfo: data.personalInfo,
+        professionalSummary: data.professionalSummary ?? null,
+        experience: data.experience ?? [],
+        education: data.education ?? [],
+        skills: Array.isArray(data.skills)
+          ? {
+              technical: data.skills,
+              soft: [],
+              languages: [],
+              certifications: []
+            }
+          : data.skills ?? {
+              technical: [],
+              soft: [],
+              languages: [],
+              certifications: []
+            },
+        projects: data.projects ?? [],
+        customSections: data.customSections ?? [],
+        targetRole: data.targetRole ?? null,
+        industry: data.industry ?? null,
+        isPublic: data.isPublic ?? false,
+        shareToken: data.isPublic ? randomUUID() : null
       }).returning();
 
-      // Log analytics
       await this.logUserAction(userId, resume.id, 'resume_created', {
         templateId: data.templateId,
         targetRole: data.targetRole,
@@ -43,22 +62,14 @@ export class ResumeService {
 
   async getResumeById(resumeId: string, userId?: string) {
     try {
-      const query = db
-        .select({
-          resume: resumes,
-          template: templates
-        })
+      const [result] = await db
+        .select({ resume: resumes, template: templates })
         .from(resumes)
         .leftJoin(templates, eq(resumes.templateId, templates.id))
         .where(eq(resumes.id, resumeId));
 
-      const [result] = await query;
-      
-      if (!result) {
-        throw new Error('Resume not found');
-      }
+      if (!result) throw new Error('Resume not found');
 
-      // Check access rights
       if (userId && result.resume.userId !== userId && !result.resume.isPublic) {
         throw new Error('Access denied');
       }
@@ -77,39 +88,36 @@ export class ResumeService {
       const { page, limit, search, industry, isPublic } = query;
       const offset = (page - 1) * limit;
 
-      let whereConditions = [eq(resumes.userId, userId)];
+      const conditions = [eq(resumes.userId, userId)];
 
       if (search) {
-        whereConditions.push(
+        conditions.push(
           sql`(${resumes.title} ILIKE ${'%' + search + '%'} OR ${resumes.targetRole} ILIKE ${'%' + search + '%'})`
         );
       }
 
       if (industry) {
-        whereConditions.push(eq(resumes.industry, industry));
+        conditions.push(eq(resumes.industry, industry));
       }
 
       if (isPublic !== undefined) {
-        whereConditions.push(eq(resumes.isPublic, isPublic));
+        conditions.push(eq(resumes.isPublic, isPublic));
       }
 
       const [resumeList, countResult] = await Promise.all([
         db
-          .select({
-            resume: resumes,
-            template: templates
-          })
+          .select({ resume: resumes, template: templates })
           .from(resumes)
           .leftJoin(templates, eq(resumes.templateId, templates.id))
-          .where(and(...whereConditions))
+          .where(and(...conditions))
           .orderBy(desc(resumes.updatedAt))
           .limit(limit)
           .offset(offset),
-        
+
         db
           .select({ count: sql<number>`count(*)` })
           .from(resumes)
-          .where(and(...whereConditions))
+          .where(and(...conditions))
       ]);
 
       const total = countResult[0]?.count || 0;
@@ -136,13 +144,9 @@ export class ResumeService {
 
   async updateResume(resumeId: string, userId: string, data: UpdateResumeInput) {
     try {
-      // Verify ownership
       const existingResume = await this.getResumeById(resumeId, userId);
-      if (existingResume.userId !== userId) {
-        throw new Error('Access denied');
-      }
+      if (existingResume.userId !== userId) throw new Error('Access denied');
 
-      // Generate share token if making public
       let updateData: any = { ...data };
       if (data.isPublic === true && !existingResume.shareToken) {
         updateData.shareToken = randomUUID();
@@ -150,21 +154,17 @@ export class ResumeService {
         updateData.shareToken = null;
       }
 
-      const [updatedResume] = await db
+      const [updated] = await db
         .update(resumes)
-        .set({
-          ...updateData,
-          updatedAt: new Date()
-        })
+        .set({ ...updateData, updatedAt: new Date() })
         .where(eq(resumes.id, resumeId))
         .returning();
 
-      // Log analytics
       await this.logUserAction(userId, resumeId, 'resume_updated', {
         fieldsUpdated: Object.keys(data)
       });
 
-      return updatedResume;
+      return updated;
     } catch (error) {
       throw new Error(`Failed to update resume: ${getErrorMessage(error)}`);
     }
@@ -172,17 +172,12 @@ export class ResumeService {
 
   async deleteResume(resumeId: string, userId: string) {
     try {
-      // Verify ownership
-      const existingResume = await this.getResumeById(resumeId);
-      if (existingResume.userId !== userId) {
-        throw new Error('Access denied');
-      }
+      const existing = await this.getResumeById(resumeId);
+      if (existing.userId !== userId) throw new Error('Access denied');
 
       await db.delete(resumes).where(eq(resumes.id, resumeId));
 
-      // Log analytics
       await this.logUserAction(userId, resumeId, 'resume_deleted');
-
       return { success: true };
     } catch (error) {
       throw new Error(`Failed to delete resume: ${getErrorMessage(error)}`);
@@ -191,35 +186,33 @@ export class ResumeService {
 
   async bulkDeleteResumes(userId: string, data: BulkDeleteInput) {
     try {
-      const { resumeIds } = data;
+      const ids = data.resumeIds;
 
-      // Verify ownership of all resumes
-      const userResumes = await db
+      const owned = await db
         .select({ id: resumes.id })
         .from(resumes)
         .where(and(
           eq(resumes.userId, userId),
-          sql`${resumes.id} = ANY(${resumeIds})`
+          sql`${resumes.id} = ANY(${ids})`
         ));
 
-      if (userResumes.length !== resumeIds.length) {
-        throw new Error('Some resumes not found or access denied');
+      if (owned.length !== ids.length) {
+        throw new Error('Some resumes not found or not owned by user');
       }
 
       await db.delete(resumes).where(
         and(
           eq(resumes.userId, userId),
-          sql`${resumes.id} = ANY(${resumeIds})`
+          sql`${resumes.id} = ANY(${ids})`
         )
       );
 
-      // Log analytics
       await this.logUserAction(userId, null, 'bulk_delete_resumes', {
-        deletedCount: resumeIds.length,
-        resumeIds
+        deletedCount: ids.length,
+        resumeIds: ids
       });
 
-      return { success: true, deletedCount: resumeIds.length };
+      return { success: true, deletedCount: ids.length };
     } catch (error) {
       throw new Error(`Failed to bulk delete resumes: ${getErrorMessage(error)}`);
     }
@@ -228,62 +221,43 @@ export class ResumeService {
   async shareResume(resumeId: string, userId: string, data: ShareResumeInput) {
     try {
       const { isPublic } = data;
-      
-      let shareToken = null;
-      if (isPublic) {
-        shareToken = randomUUID();
-      }
 
-      const [updatedResume] = await db
+      const [updated] = await db
         .update(resumes)
         .set({
           isPublic,
-          shareToken,
+          shareToken: isPublic ? randomUUID() : null,
           updatedAt: new Date()
         })
-        .where(and(
-          eq(resumes.id, resumeId),
-          eq(resumes.userId, userId)
-        ))
+        .where(and(eq(resumes.id, resumeId), eq(resumes.userId, userId)))
         .returning();
 
-      if (!updatedResume) {
-        throw new Error('Resume not found or access denied');
-      }
+      if (!updated) throw new Error('Resume not found or unauthorized');
 
-      // Log analytics
       await this.logUserAction(userId, resumeId, 'resume_shared', {
         isPublic,
-        shareToken
+        shareToken: updated.shareToken
       });
 
-      return updatedResume;
+      return updated;
     } catch (error) {
       throw new Error(`Failed to share resume: ${getErrorMessage(error)}`);
     }
   }
 
-  async getResumeByShareToken(shareToken: string) {
+  async getResumeByShareToken(token: string) {
     try {
-      const [resume] = await db
-        .select({
-          resume: resumes,
-          template: templates
-        })
+      const [found] = await db
+        .select({ resume: resumes, template: templates })
         .from(resumes)
         .leftJoin(templates, eq(resumes.templateId, templates.id))
-        .where(and(
-          eq(resumes.shareToken, shareToken),
-          eq(resumes.isPublic, true)
-        ));
+        .where(and(eq(resumes.shareToken, token), eq(resumes.isPublic, true)));
 
-      if (!resume) {
-        throw new Error('Public resume not found');
-      }
+      if (!found) throw new Error('Public resume not found');
 
       return {
-        ...resume.resume,
-        template: resume.template
+        ...found.resume,
+        template: found.template
       };
     } catch (error) {
       throw new Error(`Failed to get shared resume: ${getErrorMessage(error)}`);
@@ -292,36 +266,26 @@ export class ResumeService {
 
   async duplicateResume(resumeId: string, userId: string, title?: string) {
     try {
-      const originalResume = await this.getResumeById(resumeId, userId);
-      
-      if (originalResume.userId !== userId) {
-        throw new Error('Access denied');
-      }
+      const resume = await this.getResumeById(resumeId, userId);
+      if (resume.userId !== userId) throw new Error('Access denied');
 
-      const duplicateData: any = {
-        ...originalResume,
-        title: title || `${originalResume.title} (Copy)`,
+      const {
+        id, createdAt, updatedAt, template, ...clean
+      } = resume;
+
+      const [duplicated] = await db.insert(resumes).values({
+        ...clean,
+        userId,
+        title: title ?? `${resume.title} (Copy)`,
         isPublic: false,
         shareToken: null
-      };
+      }).returning();
 
-      // Remove id and timestamps - create a clean object for insertion
-      const {
-        id,
-        createdAt,
-        updatedAt,
-        template,
-        ...cleanData
-      } = duplicateData;
-
-      const [duplicatedResume] = await db.insert(resumes).values(cleanData).returning();
-
-      // Log analytics
-      await this.logUserAction(userId, duplicatedResume.id, 'resume_duplicated', {
+      await this.logUserAction(userId, duplicated.id, 'resume_duplicated', {
         originalResumeId: resumeId
       });
 
-      return duplicatedResume;
+      return duplicated;
     } catch (error) {
       throw new Error(`Failed to duplicate resume: ${getErrorMessage(error)}`);
     }
@@ -329,7 +293,7 @@ export class ResumeService {
 
   async getResumeStats(userId: string) {
     try {
-      const stats = await db
+      const [stats] = await db
         .select({
           total: sql<number>`count(*)`,
           public: sql<number>`count(*) filter (where ${resumes.isPublic} = true)`,
@@ -340,7 +304,7 @@ export class ResumeService {
         .from(resumes)
         .where(eq(resumes.userId, userId));
 
-      return stats[0] || {
+      return stats || {
         total: 0,
         public: 0,
         private: 0,
@@ -353,9 +317,9 @@ export class ResumeService {
   }
 
   private async logUserAction(
-    userId: string, 
-    resumeId: string | null, 
-    actionType: string, 
+    userId: string,
+    resumeId: string | null,
+    actionType: string,
     metadata?: Record<string, any>
   ) {
     try {
@@ -367,7 +331,6 @@ export class ResumeService {
         timestamp: new Date()
       });
     } catch (error) {
-      // Log error but don't throw - analytics failure shouldn't break main functionality
       console.error('Failed to log user action:', getErrorMessage(error));
     }
   }

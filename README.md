@@ -1,125 +1,297 @@
-```
-npm install
-npm run dev
-```
+PS C:\Users\kipronoh\Desktop\Lock-in\PitchMe-Backend\pitchme> npm run dev
 
-```
-open http://localhost:3000
-```
+> dev
+> tsx watch src/index.ts
 
-register 
-{
-  "email": "jane.doe@example.com",
-  "password": "SecureP@ssw0rd",
-  "firstName": "Jane",
-  "lastName": "Doe"
-}
-
-{
-  "email": "Fidel@example.com",
-  "password": "Tokyo2020",
-  "firstName": "Fidel",
-  "lastName": "Langat"
-}
-
-{
-  "email": "Fidel@example.com",
-  "password": "Tokyo2020"
-} 
-
-
-{
-  "userId": "0d8bd9e2-a2ee-4f7f-b267-f0cba49ad542",
-  "templateId": "69cba3dd-1234-4c97-a2fb-49f11a1c2abc",
-  "title": "Software Engineer Resume",
+🚀 Server running on port 3000
+<-- OPTIONS /auth/login
+--> OPTIONS /auth/login 204 12ms
+<-- POST /auth/login
+--> POST /auth/login 200 2s
+<-- OPTIONS /resumes
+--> OPTIONS /resumes 204 1ms
+<-- POST /resumes
+--- Backend createResume ---
+Received request body: {
   "personalInfo": {
-    "fullName": "Sandra Kiprono",
-    "email": "sandra.kiprono@example.com",
-    "phone": "+254712345678",
-    "location": "Nairobi, Kenya",
-    "website": "https://sandrakiprono.dev",
-    "linkedin": "https://linkedin.com/in/sandrakiprono",
-    "github": "https://github.com/sandrakiprono"
+    "fullName": "Fidel Langat",
+    "email": "langat@gmail.com",
+    "phone": "0111260308",
+    "location": "kutus",
+    "linkedIn": "linkedin.com/in/yourname",
+    "portfolio": "yourname.dev"
   },
-  "professionalSummary": "Passionate software engineer with 4+ years of experience building scalable web applications and contributing to open-source projects.",
+  "summary": "Innovative full-stack developer with a strong foundation in JavaScript, React, and backend technologies. Skilled in transforming complex requirements into user-friendly applications with exceptional performance. Experience leading development teams, conducting code reviews, and implementing automated testing strategies that increased code coverage to 85%.",
   "experience": [
     {
-      "id": "exp-1",
-      "company": "Andela",
-      "position": "Full Stack Developer",
-      "startDate": "2021-01-01",
-      "endDate": "2023-12-31",
-      "isCurrentRole": false,
-      "description": "Worked on multiple client-facing applications.",
-      "achievements": [
-        "Improved app performance by 40%",
-        "Led migration to TypeScript"
-      ]
-    },
-    {
-      "id": "exp-2",
-      "company": "Safaricom",
-      "position": "Backend Engineer",
-      "startDate": "2024-01-01",
-      "isCurrentRole": true,
-      "description": "Building APIs and integrating with M-Pesa.",
-      "achievements": [
-        "Integrated secure mobile payment workflows",
-        "Reduced latency by 30% using Redis"
-      ]
+      "id": "1751576366745",
+      "title": "ss",
+      "company": "ss",
+      "location": "ss",
+      "startDate": "2025-08",
+      "endDate": "",
+      "current": true,
+      "description": "Managed innovative solutions and processes, reducing response times by 40%."
     }
   ],
   "education": [
     {
-      "id": "edu-1",
-      "institution": "University of Nairobi",
-      "degree": "Bachelor of Science",
-      "field": "Computer Science",
-      "startDate": "2016-09-01",
-      "endDate": "2020-06-30",
-      "gpa": "3.7",
-      "achievements": [
-        "Dean’s List (2018–2020)",
-        "President, Coding Club"
-      ]
+      "id": "1751576394168",
+      "degree": "ss",
+      "school": "ss",
+      "location": "ss",
+      "graduationDate": "2025-08",
+      "gpa": "",
+      "startDate": "2025-08",
+      "endDate": "2025-12"
     }
   ],
-  "skills": {
-    "technical": ["JavaScript", "TypeScript", "Node.js", "React", "PostgreSQL", "Docker"],
-    "soft": ["Communication", "Problem Solving", "Team Leadership"],
-    "languages": ["English", "Swahili"],
-    "certifications": ["AWS Certified Developer", "Scrum Master Certified"]
-  },
+  "skills": [
+    "Vue.js",
+    "Node.js",
+    "MongoDB",
+    "AWS",
+    "Figma",
+    "Leadership"
+  ],
   "projects": [
     {
-      "id": "proj-1",
-      "name": "QuikRide",
-      "description": "Car rental platform with real-time booking and M-Pesa integration.",
-      "technologies": ["React", "Node.js", "PostgreSQL", "Drizzle ORM"],
-      "url": "https://quikride.co.ke",
-      "github": "https://github.com/sandrakiprono/quikride",
-      "startDate": "2023-01-01",
-      "endDate": "2023-06-30"
-    }
-  ],
-  "customSections": [
-    {
-      "id": "custom-1",
-      "title": "Volunteer Work",
-      "content": "Mentor at She Code Africa, helping young women learn programming.",
-      "type": "text"
+      "id": "1751576425991",
+      "title": "ssss",
+      "description": "ssss",
+      "technologies": [
+        "Node.js"
+      ],
+      "link": "ddd",
+      "name": "ssss",
+      "startDate": "2025-08",
+      "endDate": "2025-12"
     },
     {
-      "id": "custom-2",
-      "title": "Achievements",
-      "content": "",
-      "type": "achievements"
+      "id": "1751577623588",
+      "title": "",
+      "description": "s",
+      "technologies": [
+        "Node.js"
+      ],
+      "link": "ss",
+      "startDate": "2025-08",
+      "endDate": "2025-06"
+    }
+  ]
+}
+--- Backend createResume Error ---
+Error occurred: ZodError: [
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "experience",
+      0,
+      "position"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "boolean",
+    "received": "undefined",
+    "path": [
+      "experience",
+      0,
+      "isCurrentRole"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "array",
+    "received": "undefined",
+    "path": [
+      "experience",
+      0,
+      "achievements"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "education",
+      0,
+      "institution"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "education",
+      0,
+      "field"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path": [
+      "projects",
+      1,
+      "name"
+    ],
+    "message": "Required"
+  }
+]
+    at get error (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/zod/dist/esm/v3/types.js:39:31)
+    at ZodObject.parse (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/zod/dist/esm/v3/types.js:114:22)
+    at createResume (C:\Users\kipronoh\Desktop\Lock-in\PitchMe-Backend\pitchme\src\Resume\resume.controller.ts:45:48)
+    at async dispatch (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/hono/dist/compose.js:22:17)
+    at async <anonymous> (C:\Users\kipronoh\Desktop\Lock-in\PitchMe-Backend\pitchme\src\rate.middleware.ts:45:5)
+    at async dispatch (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/hono/dist/compose.js:22:17)
+    at async authMiddleware (C:\Users\kipronoh\Desktop\Lock-in\PitchMe-Backend\pitchme\src\middleware.ts:37:5)
+    at async dispatch (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/hono/dist/compose.js:22:17)
+    at async cors2 (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/hono/dist/middleware/cors/index.js:84:5)
+    at async dispatch (file:///C:/Users/kipronoh/Desktop/Lock-in/PitchMe-Backend/pitchme/node_modules/hono/dist/compose.js:22:17) {
+  issues: [
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'boolean',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
     }
   ],
-  "targetRole": "Senior Software Engineer",
-  "industry": "Technology",
-  "isPublic": true,
-  "shareToken": "e9b8a4f5-12a3-4a3d-b945-123456789abc",
-  "atsScore": 85,
-  "lastAnalyzedAt": "2025-07-02T20:00:00.000Z"
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)],
+  errors: [
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'boolean',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'array',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    },
+    {
+      code: 'invalid_type',
+      expected: 'string',
+      received: 'undefined',
+      path: [Array],
+      message: 'Required'
+    }
+  ]
 }
+Zod validation failed: [
+  {
+    code: 'invalid_type',
+    expected: 'string',
+    received: 'undefined',
+    path: [ 'experience', 0, 'position' ],
+    message: 'Required'
+  },
+  {
+    code: 'invalid_type',
+    expected: 'boolean',
+    received: 'undefined',
+    path: [ 'experience', 0, 'isCurrentRole' ],
+    message: 'Required'
+  },
+  {
+    code: 'invalid_type',
+    expected: 'array',
+    received: 'undefined',
+    path: [ 'experience', 0, 'achievements' ],
+    message: 'Required'
+  },
+  {
+    code: 'invalid_type',
+    expected: 'string',
+    received: 'undefined',
+    path: [ 'education', 0, 'institution' ],
+    message: 'Required'
+  },
+  {
+    code: 'invalid_type',
+    expected: 'string',
+    received: 'undefined',
+    path: [ 'education', 0, 'field' ],
+    message: 'Required'
+  },
+  {
+    code: 'invalid_type',
+    expected: 'string',
+    received: 'undefined',
+    path: [ 'projects', 1, 'name' ],
+    message: 'Required'
+  }
+]
+--> POST /resumes 400 93ms
