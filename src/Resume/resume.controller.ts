@@ -10,6 +10,10 @@ import {
 } from '../validator.js';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
+import puppeteer from 'puppeteer';
+import handlebars from 'handlebars';
+import fs from 'fs';
+import path from 'path';
 
 // Helper function to handle unknown errors
 function getErrorMessage(error: unknown): string {
@@ -341,6 +345,48 @@ export class ResumeController {
       });
     } catch (error) {
       throw new HTTPException(500, { message: getErrorMessage(error) });
+    }
+  };
+
+  // Download resume as PDF
+  downloadResume = async (c: Context) => {
+    try {
+      const resumeId = c.req.param('id');
+      const userId = c.get('userId');
+
+      if (!resumeId) {
+        throw new HTTPException(400, { message: 'Resume ID is required' });
+      }
+
+      const resume = await this.resumeService.getResumeById(resumeId, userId);
+
+      // Read and compile the Handlebars template
+      const templatePath = path.resolve(process.cwd(), 'src', 'Templates', 'resume.template.html');
+      const templateHtml = fs.readFileSync(templatePath, 'utf8');
+      const template = handlebars.compile(templateHtml);
+
+      // Populate the template with resume data
+      const content = template(resume);
+
+      // Generate PDF using Puppeteer
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.setContent(content);
+      const pdf = await page.pdf({ format: 'A4' });
+      await browser.close();
+
+      c.header('Content-Type', 'application/pdf');
+      c.header('Content-Disposition', `attachment; filename=${resume.title}.pdf`);
+      return c.body(pdf);
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage === 'Resume not found') {
+        throw new HTTPException(404, { message: 'Resume not found' });
+      }
+      if (errorMessage === 'Access denied') {
+        throw new HTTPException(403, { message: 'Access denied' });
+      }
+      throw new HTTPException(500, { message: errorMessage });
     }
   };
 }

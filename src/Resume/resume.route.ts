@@ -30,4 +30,7 @@ resumeRoutes.post('/:id/share', resumeController.shareResume);
 // Resume duplication
 resumeRoutes.post('/:id/duplicate', resumeController.duplicateResume);
 
+// Resume download
+resumeRoutes.get('/:id/download', resumeController.downloadResume);
+
 export { resumeRoutes };
